@@ -15,7 +15,8 @@ class ClothItem {
     required this.washPrice,
     this.ironPrice,
     this.isSelected = false,
-    this.selectedService, required this.img,
+    this.selectedService,
+    required this.img,
     this.quantity = 1,
   });
 
@@ -24,22 +25,19 @@ class ClothItem {
       case ServiceType.wash:
         return washPrice * quantity;
       case ServiceType.iron:
-        if(ironPrice!=null){
+        if (ironPrice != null) {
           return ironPrice! * quantity;
-        }else {
+        } else {
           return 0.0;
         }
       case ServiceType.both:
-        if(ironPrice!=null){
+        if (ironPrice != null) {
           return (washPrice + ironPrice!) * quantity;
-        }
-        else{
+        } else {
           return washPrice * quantity;
         }
       default:
         return 0;
     }
   }
-
-
 }

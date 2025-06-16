@@ -1,85 +1,20 @@
-// // lib/services/printer_service.dart
-//
-//
-// import 'package:sunmi_printer_plus/core/enums/enums.dart';
-// import 'package:sunmi_printer_plus/core/styles/sunmi_text_style.dart';
-// import 'package:sunmi_printer_plus/core/sunmi/sunmi_printer.dart';
-//
-// class PrinterService {
-//   /// Binds to the Sunmi print service and begins a buffered transaction.
-//   Future<void> _beginPrintTransaction() async {
-//     await SunmiPrinter.bindingPrinter();                // bind to printer :contentReference[oaicite:0]{index=0}
-//     await SunmiPrinter.startTransactionPrint(true);     // start buffered printing :contentReference[oaicite:1]{index=1}
-//   }
-//
-//   /// Ends the buffered transaction and cuts the paper.
-//   Future<void> _endPrintTransaction() async {
-//     await SunmiPrinter.exitTransactionPrint(true);      // commit print buffer :contentReference[oaicite:2]{index=2}
-//     await SunmiPrinter.cut();                           // cut the paper :contentReference[oaicite:3]{index=3}
-//   }
-//
-//   /// Prints a single receipt.
-//   Future<void> printReceipt({
-//     required String shopName,
-//     required List<Map<String, dynamic>> items, // each: {'name','service','price'}
-//     required double total,
-//   }) async {
-//     await _beginPrintTransaction();
-//
-//     // 1) Header
-//     await SunmiPrinter.printText(
-//       shopName,
-//       style: SunmiTextStyle(
-//         align: SunmiPrintAlign.CENTER,
-//         //TODO: fontSize: SunmiFontSize.XL.index * 16, // XL enum → 5†SM†MD… maps to fontSize in px :contentReference[oaicite:4]{index=4}
-//       ),
-//     );
-//     await SunmiPrinter.lineWrap(1);
-//
-//     // 2) Items
-//     for (var item in items) {
-//       final line =
-//           '${item['name']} (${item['service']}): \$${(item['price'] as double).toStringAsFixed(2)}';
-//       await SunmiPrinter.printText(line);
-//     }
-//     await SunmiPrinter.lineWrap(1);
-//
-//     // 3) Total
-//     await SunmiPrinter.printText(
-//       'TOTAL: \$${total.toStringAsFixed(2)}',
-//       style: SunmiTextStyle(
-//         align: SunmiPrintAlign.RIGHT,
-//         //TODO: fontSize: SunmiFontSize.LG.index * 16,
-//         bold: true,
-//       ),
-//     );
-//     await SunmiPrinter.lineWrap(2);
-//
-//     await _endPrintTransaction();
-//   }
-// }
-// lib/services/printer_service.dart
 import 'package:sunmi_printer_plus/core/enums/enums.dart';
 import 'package:sunmi_printer_plus/core/styles/sunmi_barcode_style.dart';
 import 'package:sunmi_printer_plus/core/styles/sunmi_qrcode_style.dart';
 import 'package:sunmi_printer_plus/core/styles/sunmi_text_style.dart';
 import 'package:sunmi_printer_plus/core/sunmi/sunmi_printer.dart';
-import 'package:sunmi_printer_plus/core/types/sunmi_column.dart';
-import 'package:sunmi_printer_plus/sunmi_printer_plus.dart';
 import 'dart:typed_data';
-import 'package:intl/intl.dart';  // for date formattin
+import 'package:intl/intl.dart';
 
+/// A service class to encapsulate common printer operations using Sunmi printers.
 class PrinterService {
   /// Initializes the printer. Returns true if successful.
   Future<bool> initPrinter() async {
     try {
-      // bind to the native Sunmi printer service
       await SunmiPrinter.bindingPrinter();
-      // then initialize it
       await SunmiPrinter.initPrinter();
       return true;
     } catch (e) {
-      // log or handle error
       return false;
     }
   }
@@ -131,13 +66,12 @@ class PrinterService {
         type: type,
         height: height,
         size: width,
-        // textPosition: textPosition,
         align: align,
       ),
     );
   }
 
-  /// Prints an image from bytes (Uint8List).
+  /// Prints an image from bytes.
   Future<void> printImage(Uint8List imageBytes, {SunmiPrintAlign align = SunmiPrintAlign.CENTER}) async {
     await SunmiPrinter.printImage(
       imageBytes,
@@ -150,7 +84,7 @@ class PrinterService {
     await SunmiPrinter.printText('------------------------------');
   }
 
-  /// Jumps n lines.
+  /// Inserts blank lines.
   Future<void> lineWrap(int lines) async {
     await SunmiPrinter.lineWrap(lines);
   }
@@ -159,68 +93,35 @@ class PrinterService {
   Future<void> cutPaper() async {
     await SunmiPrinter.cutPaper();
   }
-
-  /// Gets the printer serial number.
-  // Future<String?> getSerialNumber() async {
-  //   return await SunmiPrinter.getPrinterSerialNo();
-  // }
-
-  /// Gets the printer version.
-  // Future<String?> getPrinterVersion() async {
-  //   return await SunmiPrinter.getPrinterVersion();
-  // }
-
-  /// Gets the printer paper size (0: 80mm, 1: 58mm).
-  // Future<int?> getPaperSize() async {
-  //   return await SunmiPrinter.getPrinterPaperSize();
-  // }
-
 }
 
-
-
+/// Extension for printing formatted order receipts.
 extension ReceiptPrinting on PrinterService {
   Future<void> printOrderReceipt({
     required String shopName,
-    required List<Map<String, dynamic>> items,  // name, service, price
+    required List<Map<String, dynamic>> items,
     required double total,
-    String? phoneNumber, required String recieptId
+    String? phoneNumber,
+    required String recieptId,
   }) async {
-    // await SunmiPrinter.line();
-    // await SunmiPrinter.addText(text: "THis is addText");
-    // await SunmiPrinter.printRow(cols: [SunmiColumn(text: 'col text', width: 10),SunmiColumn(text: '2col2text', width: 10)]);
-    // await SunmiPrinter.cutPaper();
     final now = DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now());
 
-    // 1. Header
     await printText(shopName, bold: true, fontSize: 28, align: SunmiPrintAlign.CENTER);
-    await printText('Receipt No:$recieptId}', bold: true, align: SunmiPrintAlign.CENTER);
+    await printText('Receipt No:$recieptId', bold: true, align: SunmiPrintAlign.CENTER);
     await printDivider();
 
-    // if(phoneNumber!=null){
-    //   if(phoneNumber.isNotEmpty){
-    //     await printText('Customer Number : $phoneNumber', bold: true, align: SunmiPrintAlign.CENTER);
-    //   }
-    // }
-
-    // 2. Items
     for (var item in items) {
       final line = '${item['name']} (${item['service']}) x ${item['quantity']}';
-      await printText(line, bold: false, fontSize: 24);
+      await printText(line, fontSize: 24);
       await printText('Dhs ${item['price'].toStringAsFixed(2)}', align: SunmiPrintAlign.RIGHT);
     }
-    await printDivider();
-    print(total);
-    // 3. Total
-    // await printText('TOTAL:', bold: true, fontSize: 26);
-    await printText('TOTAL: Dhs ${total.toStringAsFixed(2)}', bold: true, fontSize: 26, align: SunmiPrintAlign.RIGHT);
 
-    // 4. Footer
+    await printDivider();
+    await printText('TOTAL: Dhs ${total.toStringAsFixed(2)}', bold: true, fontSize: 26, align: SunmiPrintAlign.RIGHT);
     await printDivider();
     await printText('Date: $now', fontSize: 20);
     await printText('Thank you for your business!', align: SunmiPrintAlign.CENTER);
     await printDivider();
-    // await lineWrap(4);
     await cutPaper();
   }
 }

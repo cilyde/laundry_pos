@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
 
+/// QuantityEditor is a reusable widget for editing integer quantities.
+///
+/// It shows plus and minus buttons to increment or decrement the quantity,
+/// displays the current value, and provides an 'Update' button
+/// that triggers a callback with the updated quantity.
 class QuantityEditor extends StatefulWidget {
+  /// The initial quantity to display.
   final int initialQuantity;
+
+  /// Callback to be called when the quantity is updated.
   final ValueChanged<int> onQuantityChanged;
 
   const QuantityEditor({
@@ -32,9 +40,12 @@ class _QuantityEditorState extends State<QuantityEditor> {
           icon: Icon(Icons.remove),
           onPressed: quantity > 1
               ? () => setState(() => quantity--)
-              : null,
+              : null, // Disable button when quantity is 1
         ),
-        Text(quantity.toString(), style: TextStyle(fontSize: 18)),
+        Text(
+          quantity.toString(),
+          style: TextStyle(fontSize: 18),
+        ),
         IconButton(
           icon: Icon(Icons.add),
           onPressed: () => setState(() => quantity++),

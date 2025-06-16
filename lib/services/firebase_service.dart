@@ -1,25 +1,3 @@
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import '../models/cloth_item.dart';
-//
-// class FirebaseService {
-//   static Future<void> saveOrder(List<ClothItem> items, double total) async {
-//     final selectedItems = items
-//         .where((item) => item.isSelected && item.selectedService != null)
-//         .map((item) => {
-//       'name': item.name,
-//       'service': item.selectedService.toString().split('.').last,
-//       'price': item.totalPrice,
-//     })
-//         .toList();
-//
-//     await FirebaseFirestore.instance.collection('orders').add({
-//       'items': selectedItems,
-//       'total': total,
-//       'timestamp': FieldValue.serverTimestamp(),
-//     });
-//   }
-// }
-// lib/services/firebase_service.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/cloth_item.dart';
 import 'package:intl/intl.dart';
@@ -102,14 +80,7 @@ class FirebaseService {
       'items': selectedItems,
     });
 
-    // 6. Update the customer's last purchase date
-    // await FirebaseFirestore.instance
-    //     .collection('customers')
-    //     .doc(customerId)
-    //     .update({
-    //   'last_purchase_date': FieldValue.serverTimestamp(),
-
-    // 5. Update customer's last_purchase_date and increment loyalty_points
+    // 6. Update the customer's last purchase date and total spent
     final customerRef =
     FirebaseFirestore.instance.collection('customers').doc(customerId);
 
