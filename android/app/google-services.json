@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "71229892932",
+    "project_id": "fresh-and-clean-mussafah",
+    "storage_bucket": "fresh-and-clean-mussafah.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:71229892932:android:4ff7193f34fad764d24f11",
+        "android_client_info": {
+          "package_name": "com.cilyde.laundry_os"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNMRiEKt6a3UfvnhlSZrHGrSKdHQRolq4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
