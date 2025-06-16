@@ -1,16 +1,36 @@
 # laundry_os
 
-Laundry OS
+# Laundry POS Flutter App with Sunmi Integration
+
+A Flutter-based Point of Sale (POS) application designed for laundry services, integrated with Sunmi devices for seamless order management, pricing, and receipt printing.
+
+## Features
+
+- Select services: Wash, Iron, or Both
+- Add multiple clothing items per order
+- Real-time order syncing with Firebase Firestore
+- Supports multiple languages (English, Hindi, Arabic)
+- Print receipts twice: customer and shop copies using Sunmi printer
+- Simple and intuitive UI for quick order processing
+- Secure and reliable backend with Firebase
+
+## Tech Stack
+
+- Flutter (Dart)
+- Firebase Firestore for backend database
+- Sunmi printer integration via `sunmi_printer_plus` package
+- State management with Provider (or your chosen method)
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+### Prerequisites
 
-A few resources to get you started if this is your first Flutter project:
+- Flutter SDK installed
+- Sunmi device for testing printing functionality
+- Firebase project set up and connected (includes `firebase_options.dart`)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Installation
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+1. Clone the repo:
+   ```bash
+   git clone https://github.com/yourusername/yourrepo.git
