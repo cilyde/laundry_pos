@@ -29,8 +29,3 @@ A Flutter-based Point of Sale (POS) application designed for laundry services, i
 - Sunmi device for testing printing functionality
 - Firebase project set up and connected (includes `firebase_options.dart`)
 
-### Installation
-
-1. Clone the repo:
-   ```bash
-   git clone https://github.com/yourusername/yourrepo.git
