@@ -1,6 +1,10 @@
+import 'dart:async';
+
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 
 import '../models/cloth_item.dart';
+import '../services/connectivity_service.dart';
 import '../services/firebase_service.dart';
 import '../services/print_service.dart';
 import '../utils/translation.dart';
@@ -16,14 +20,18 @@ String tr(String key, String lang) => translations[key.toLowerCase()]?[lang] ?? 
 /// quantity updates, removal, order confirmation, printing receipts,
 /// and syncing order data to Firestore.
 class POSViewModel extends ChangeNotifier {
-  final PrinterService _printer;  // Service to handle printing
+  final PrinterService _printer; // Service to handle printing
 
-  bool _isLoading = false;        // Loading indicator flag
+  bool _isLoading = false; // Loading indicator flag
   bool get isLoading => _isLoading;
+
+  bool _isOnline = true; // ✅ flag to track connectivity
+  bool get isOnline => _isOnline;
 
   // Constructor initializes the printer service and triggers printer init.
   POSViewModel(this._printer) {
     _initPrinter();
+    // _listenToConnectivity(); // ✅ listen on init
   }
 
   // Internal async method to initialize the printer hardware or SDK.
@@ -36,11 +44,7 @@ class POSViewModel extends ChangeNotifier {
   ServiceType currentService = ServiceType.wash;
 
   // Map holding lists of selected ClothItems grouped by service type
-  final Map<ServiceType, List<ClothItem>> _selectedItemsByService = {
-    ServiceType.wash: [],
-    ServiceType.iron: [],
-    ServiceType.both: [],
-  };
+  final Map<ServiceType, List<ClothItem>> _selectedItemsByService = {ServiceType.wash: [], ServiceType.iron: [], ServiceType.both: []};
 
   /// Exposes the full grouped map of selected items for UI display
   Map<ServiceType, List<ClothItem>> get allSelectedItemsGrouped => _selectedItemsByService;
@@ -79,18 +83,13 @@ class POSViewModel extends ChangeNotifier {
   List<ClothItem> get selectedItems => _selectedItemsByService[currentService]!;
 
   /// Calculates the total price of all selected items across all services.
-  double get totalPrice =>
-      _selectedItemsByService.values
-          .expand((list) => list)
-          .fold(0.0, (sum, item) => sum + item.totalPrice);
+  double get totalPrice => _selectedItemsByService.values.expand((list) => list).fold(0.0, (sum, item) => sum + item.totalPrice);
 
   /// Updates the quantity of a specific item within its service group.
   void updateQuantity(ClothItem item, int newQuantity) {
     final serviceItems = _selectedItemsByService[item.selectedService]!;
 
-    final index = serviceItems.indexWhere(
-          (e) => e.name == item.name && e.selectedService == item.selectedService,
-    );
+    final index = serviceItems.indexWhere((e) => e.name == item.name && e.selectedService == item.selectedService);
     if (index != -1) {
       serviceItems[index].quantity = newQuantity;
       notifyListeners();
@@ -102,6 +101,17 @@ class POSViewModel extends ChangeNotifier {
     final items = _selectedItemsByService[item.selectedService]!;
     items.removeWhere((e) => e.name == item.name);
     notifyListeners();
+  }
+
+  Future<bool> checkOnline() async {
+    // Check connectivity first
+    final isConnected = await ConnectivityService.hasConnection();
+    if (!isConnected) {
+      debugPrint('No internet connection.');
+      return false;
+    } else {
+      return true;
+    }
   }
 
   /// Confirms the order by:
@@ -123,22 +133,21 @@ class POSViewModel extends ChangeNotifier {
       }
 
       // Save order data to Firestore and get a receipt ID back
-      final recieptId = await FirebaseService.saveOrder(
-        phoneNumber: phoneNumber,
-        items: selectedItems,
-        total: totalPrice,
-      );
+      final recieptId = await FirebaseService.saveOrder(phoneNumber: phoneNumber, items: selectedItems, total: totalPrice);
 
       // Prepare list of receipt items for printing
-      final receiptItems = _selectedItemsByService.values
-          .expand((items) => items)
-          .map((item) => {
-        'name': item.name,
-        'service': item.selectedService.toString().split('.').last,
-        'price': item.totalPrice,
-        'quantity': item.quantity,
-      })
-          .toList();
+      final receiptItems =
+          _selectedItemsByService.values
+              .expand((items) => items)
+              .map(
+                (item) => {
+                  'name': item.name,
+                  'service': item.selectedService.toString().split('.').last,
+                  'price': item.totalPrice,
+                  'quantity': item.quantity,
+                },
+              )
+              .toList();
 
       // Print two copies with 3 seconds delay between
       for (var i = 0; i < 2; i++) {

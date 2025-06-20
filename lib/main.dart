@@ -10,6 +10,9 @@ import 'package:provider/provider.dart';
 import 'package:sunmi_printer_plus/core/sunmi/sunmi_printer.dart';
 import 'firebase_options.dart';
 
+final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -42,6 +45,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scaffoldMessengerKey: scaffoldMessengerKey,
       title: 'Fresh & Clean Laundry',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.teal),
